@@ -1,12 +1,13 @@
-import WorngReq from './worngReq.js';
+import RequisicaoIncorreta from './worngReq.js';
 
-class ValidateError extends WorngReq {
-  constructor(error) {
-    const errorsMessage = Object.values(error.errors)
-      .map(err => err.message)
+class ErroValidacao extends RequisicaoIncorreta {
+  constructor(erro) {
+    const mensagensErro = Object.values(erro.errors)
+      .map(erro => erro.message)
       .join('; ');
-    super(`we has some validation error - ${errorsMessage}`);
+
+    super(`Os seguintes erros foram encontrados: ${mensagensErro}`);
   }
 }
 
-export default ValidateError;
+export default ErroValidacao;

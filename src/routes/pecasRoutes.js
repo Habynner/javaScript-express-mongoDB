@@ -1,11 +1,12 @@
 import express from 'express';
 import PecaController from '../controllers/pecaController.js';
+import paginated from '../middlewares/paginated.js';
 
 const pecaRoutes = express.Router();
 
-pecaRoutes.get('/products', PecaController.getAllPecas);
+pecaRoutes.get('/products', PecaController.getAllPecas, paginated);
 
-pecaRoutes.get('/products/find', PecaController.searchPeca);
+pecaRoutes.get('/products/find', PecaController.searchPeca, paginated);
 
 pecaRoutes.get('/product/:id', PecaController.getOne);
 

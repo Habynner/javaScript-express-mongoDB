@@ -5,7 +5,9 @@ class FabricanteController {
 
   static async createFabricante (req, res, next) {
     try{
-      const newFabricante = await manufacturer.create(req.body);
+
+      let fab = new manufacturer(req.body);
+      const newFabricante = await fab.save();
       res.status(201).json({messsage :`manufacturer "${req.body.name}" has been created.`, made: newFabricante});
 
     }catch(error){
@@ -15,8 +17,9 @@ class FabricanteController {
 
   static async getAllFabricantes (req, res, next) {
     try{
-      const fabricantesList = await manufacturer.find({});
-      res.status(200).json({message: 'Getting all manufacturers ', made: fabricantesList});
+      const fabricantesList = manufacturer.find({});
+      req.result = fabricantesList;
+      next();
     }catch (error){
       next(error);
     }
@@ -25,7 +28,7 @@ class FabricanteController {
 
   static async getOne (req, res, next) {
     try{
-      const fab = await manufacturer.findById(req.params.id);
+      const fab = await manufacturer.findById(req.params.id).populate('name', 'name');
 
       if(!fab){
         throw new Error('não existe');
@@ -67,6 +70,35 @@ class FabricanteController {
     }catch (error){
       if(error.message === 'não existe'){
         next(new NotFound(`The manufacturer with id ${req.params.id} is not found, or does not exist.`));
+      } else {
+        next(error);
+      }
+    }
+  }
+
+
+  static async searchFabricante (req, res, next) {
+    const {name, nacionallity} = req.query;
+    try{
+      // USANDO REGEX.
+      const busca = {};
+      const regexNacionallity = new RegExp(nacionallity, 'i');
+      const regexName = new RegExp(name, 'i');
+
+      if (name) busca.name = regexName;
+
+      if (nacionallity) busca.nacionallity = regexNacionallity;
+
+      const pecaByFabricante = manufacturer.find(busca);
+      if (pecaByFabricante.length === 0) {
+        throw new Error('not found');
+      }
+      req.result = pecaByFabricante;
+
+      next();
+    }catch(error){
+      if(error.message === 'not found'){
+        next(new NotFound(`The product with id ${req.query} is not found, or does not exist.`));
       } else {
         next(error);
       }

@@ -1,9 +1,9 @@
-import BaseError from './baseError.js';
+import ErroBase from './baseError.js';
 
-class NotFound extends BaseError {
-  constructor(message = 'Page not Found.') {
-    super(message, 404);
+class NaoEncontrado extends ErroBase {
+  constructor(mensagem = 'Página não encontrada') {
+    super(mensagem, 404);
   }
 }
 
-export default NotFound;
+export default NaoEncontrado;

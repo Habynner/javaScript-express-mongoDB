@@ -5,9 +5,15 @@ class PecaController {
 
   static async createProduct (req, res, next) {
     try{
+      console.log(req.body);
       const findMade = await manufacturer.findById(req.body.fabId);
+      console.log(findMade);
+      if (!findMade) {
+        throw new Error();
+      }
       const obj = { ...req.body, fabricante: { ...findMade._doc } };
-      const newProduct = await peca.create(obj);
+      let prod = new peca(obj);
+      const newProduct = await prod.save(obj);
       res.status(201).json({messsage :`product "${req.body.tipo}" has been created.`, prduct: newProduct});
 
     }catch(error){
@@ -17,8 +23,11 @@ class PecaController {
 
   static async getAllPecas (req, res, next) {
     try{
-      const productList = await peca.find({});
-      res.status(200).json({message: 'Getting all prducts ', prducts: productList});
+      const getPecas = peca.find();
+
+      req.result = getPecas;
+
+      next();
     }catch (error){
       next(error);
     }
@@ -74,20 +83,44 @@ class PecaController {
   }
 
   static async searchPeca (req, res, next) {
-    const fabricante = req.query.fabricante;
     try{
-      const pecaByFabricante = await peca.find({ fabricante: fabricante});
-      if (!pecaByFabricante) {
+      // Na busca no fabricante controller estamos usando regex.
+      //Sem Regex com busca paginada.
+      const { fabricante, tipo, minQuantity, maxQuantity } = req.query;
+      let criteria = {};
+      if (minQuantity || maxQuantity) criteria.quantidade = {};
+
+      // get = Grater Than or Equal
+      if (minQuantity) criteria.quantidade.$gte = minQuantity;
+      // lte = Less Than or Equal
+      if (maxQuantity) criteria.quantidade.$lte = maxQuantity;
+
+      if (tipo) criteria.tipo = tipo;
+      if (fabricante) {
+        const fab = await manufacturer.findOne({ name: fabricante});
+
+        if(fab !== null){
+          criteria.fabricante = fab._id;
+        } else {
+          criteria = null;
+        }
+      }
+
+      const pecaByFabricante = peca.find(criteria);
+      if (pecaByFabricante.length === 0) {
         throw new Error('not found');
       }
-      res.status(200).json({message: 'The fabricante\'s product list was finded.', pecas: pecaByFabricante});
+      console.log('entrou aqui');
+      req.result = pecaByFabricante;
+
+
+      next();
     }catch(error){
       if(error.message === 'not found'){
-        next(new NotFound(`The product with parameter ${fabricante} is not found, or does not exist.`));
+        next(new NotFound(`The product with criteria ${req.query} is not found, or does not exist.`));
       } else {
         next(error);
       }
-
     }
   }
 };

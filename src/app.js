@@ -1,8 +1,8 @@
 import express from 'express';
 import connectDatabase from './config/dbConnect.js';
+import manipulador404 from './middlewares/manipulation404.js';
+import manipuladorDeErros from './middlewares/errosManipulation.js';
 import routes from './routes/index.js';
-import manipulation404 from './middlewares/manipulation404.js';
-import errosManipulation from './middlewares/errosManipulation.js';
 
 const connect = await connectDatabase();
 
@@ -15,10 +15,12 @@ connect.once('open', () => {
 });
 
 const app = express();
+app.use(express.json());
 routes(app);
 
-app.use(manipulation404);
+app.use(manipulador404);
 
-app.use(errosManipulation);
+ 
+app.use(manipuladorDeErros);
 
 export default app;

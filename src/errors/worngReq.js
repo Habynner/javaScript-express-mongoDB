@@ -1,9 +1,9 @@
-import BaseError from './baseError.js';
+import ErroBase from './baseError.js';
 
-class WorngReq extends BaseError {
-  constructor(message = 'One or more params are worng') {
-    super(message, 400);
+class RequisicaoIncorreta extends ErroBase {
+  constructor(mensagem = 'Um ou mais dados fornecidos estão incorretos') {
+    super(mensagem, 400);
   }
 }
 
-export default WorngReq;
+export default RequisicaoIncorreta;
